@@ -19,13 +19,13 @@ export async function createUser(user: CreateUserParams) {
   }
 }
 
-export async function getUserById(userId: string, user: any) {
+export async function getUserById(userId: string, user?: any) {
   try {
     await connectToDatabase();
 
-    const user = await User.findOne({ clerkId: userId });
+    const existingUser = await User.findOne({ clerkId: userId });
 
-    if (!user) {
+    if (!existingUser && user) {
       const newUser = await createUser({
         clerkId: userId,
         email: user.emailAddresses[0].emailAddress,
@@ -33,13 +33,11 @@ export async function getUserById(userId: string, user: any) {
         photo: user.imageUrl,
         firstName: user.firstName,
         lastName: user.lastName,
-        planId: 1,
-        creditBalance: 10,
       });
       return JSON.parse(JSON.stringify(newUser));
     }
 
-    return JSON.parse(JSON.stringify(user));
+    return JSON.parse(JSON.stringify(existingUser));
   } catch (error) {
     handleError(error);
   }
