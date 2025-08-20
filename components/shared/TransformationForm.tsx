@@ -87,7 +87,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         height: image?.height,
         config: transformationConfig,
         secureURL: image?.secureURL,
-        transformationURL: transformationUrl,
+        transformationUrl: transformationUrl,
         aspectRatio: values.aspectRatio,
         prompt: values.prompt,
         color: values.color,
@@ -95,6 +95,24 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
 
       if(action === 'Add') {
         try {
+          // Validate required fields before saving
+          console.log('🔍 Image data before saving:', imageData);
+          
+          if (!imageData.title) {
+            throw new Error('Image title is required');
+          }
+          if (!imageData.publicId) {
+            throw new Error('Image publicId is required');
+          }
+          if (!imageData.secureURL) {
+            throw new Error('Image secureURL is required. Please upload an image first.');
+          }
+          if (!imageData.transformationType) {
+            throw new Error('Transformation type is required');
+          }
+
+          console.log('✅ All required fields present, calling addImage...');
+
           const newImage = await addImage({
             image: imageData,
             userId,
@@ -107,7 +125,8 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
             router.push(`/transformations/${newImage._id}`)
           }
         } catch (error) {
-          console.log(error);
+          console.log('❌ Error saving image:', error);
+          alert(`Error saving image: ${error.message}`);
         }
       }
 
@@ -296,7 +315,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         <div className="flex flex-col gap-4">
           <Button 
             type="button"
-            className="submit-button capitalize"
+            classNamey="submit-button capitalize"
             disabled={isTransforming || newTransformation === null}
             onClick={onTransformHandler}
           >
