@@ -42,7 +42,7 @@ const MediaUploader = ({
     })
   }
 
-  const onUploadErrorHandler = () => {
+  const onUploadErrorHandler = (error: any) => {
     toast({
       title: 'Something went wrong while uploading',
       description: 'Please try again',
@@ -57,6 +57,7 @@ const MediaUploader = ({
       options={{
         multiple: false,
         resourceType: "image",
+        folder: "imaginify",
       }}
       onSuccess={onUploadSuccessHandler}
       onError={onUploadErrorHandler}
