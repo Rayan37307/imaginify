@@ -18,23 +18,38 @@ const populateUser = (query: any) => query.populate({
 // ADD IMAGE
 export async function addImage({ image, userId, path }: AddImageParams) {
   try {
+    console.log('🔍 addImage called with:', { userId, imageData: image, path });
+    
     await connectToDatabase();
+    console.log('✅ Database connected');
 
     const author = await User.findById(userId);
+    console.log('🔍 User lookup result:', author ? 'User found' : 'User not found', { userId });
 
     if (!author) {
+      console.log('❌ User not found with ID:', userId);
       throw new Error("User not found");
     }
+
+    console.log('🔍 Creating image with data:', {
+      title: image.title,
+      publicId: image.publicId,
+      transformationType: image.transformationType,
+      authorId: author._id
+    });
 
     const newImage = await Image.create({
       ...image,
       author: author._id,
     })
 
+    console.log('✅ Image created successfully:', newImage._id);
+
     revalidatePath(path);
 
     return JSON.parse(JSON.stringify(newImage));
   } catch (error) {
+    console.log('❌ Error in addImage:', error);
     handleError(error)
   }
 }
