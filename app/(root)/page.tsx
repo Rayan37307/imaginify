@@ -3,37 +3,50 @@ import { navLinks } from "@/constants"
 import { getAllImages } from "@/lib/actions/image.actions"
 import Image from "next/image"
 import Link from "next/link"
+import { Material } from '@/components/design-system/materials';
+import { useTheme } from '@/components/design-system/utils';
+import { textStyles } from '@/components/design-system/typography';
+import { spacing } from '@/components/design-system/layout';
 
 const Home = async ({ searchParams }: SearchParamProps) => {
   const page = Number(searchParams?.page) || 1;
   const searchQuery = (searchParams?.query as string) || '';
+  const { theme } = useTheme();
 
   const images = await getAllImages({ page, searchQuery})
 
   return (
     <>
-      <section className="home">
-        <h1 className="home-heading">
+      <Material material="sheet" theme={theme} className="mb-6 lg:mb-8 rounded-xl" padding="6">
+        <h1 style={{ ...textStyles.title1, marginBottom: spacing[4] }}>
           Unleash Your Creative Vision with Imaginify
         </h1>
-        <ul className="flex-center w-full gap-20">
+        <div className="flex justify-center w-full gap-8 lg:gap-20">
           {navLinks.slice(1, 5).map((link) => (
             <Link
               key={link.route}
               href={link.route}
-              className="flex-center flex-col gap-2"
+              className="flex flex-col items-center gap-2"
             >
-              <li className="flex-center w-fit rounded-full bg-white p-4">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white dark:bg-gray-800 shadow-md">
                 <Image src={link.icon} alt="image" width={24} height={24} />
-              </li>
-              <p className="p-14-medium text-center text-white">{link.label}</p>
+              </div>
+              <p 
+                className="text-center"
+                style={{ 
+                  ...textStyles.subhead,
+                  color: theme === 'light' ? '#333333' : '#ffffff' 
+                }}
+              >
+                {link.label}
+              </p>
             </Link>
           ))}
-        </ul>
-      </section>
+        </div>
+      </Material>
 
-      <section className="sm:mt-12">
-        <Collection 
+      <section className="sm:mt-6 lg:mt-8">
+        <Collection
           hasSearch={true}
           images={images?.data}
           totalPages={images?.totalPage}

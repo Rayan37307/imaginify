@@ -1,61 +1,69 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
+import { useTheme } from '@/components/design-system/utils';
+import { Material } from '@/components/design-system/materials';
+import { textStyles } from '@/components/design-system/typography';
+import { Controls } from '@/components/design-system/controls';
+import { Modal } from '@/components/design-system/motion';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { deleteImage } from "@/lib/actions/image.actions";
-
-import { Button } from "../ui/button";
 
 export const DeleteConfirmation = ({ imageId }: { imageId: string }) => {
   const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { theme } = useTheme();
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild className="w-full rounded-full">
-        <Button
-          type="button"
-          className="button h-[44px] w-full md:h-[54px]"
-          variant="destructive"
-        >
-          Delete Image
-        </Button>
-      </AlertDialogTrigger>
+    <>
+      <Controls.Button
+        theme={theme}
+        variant="push"
+        onClick={() => setIsOpen(true)}
+        className="w-full"
+      >
+        Delete Image
+      </Controls.Button>
 
-      <AlertDialogContent className="flex flex-col gap-10">
-        <AlertDialogHeader>
-          <AlertDialogTitle>
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <Material material="popover" theme={theme} className="p-6 max-w-md rounded-xl">
+          <h3 style={{ ...textStyles.headline, marginBottom: '12px' }}>
             Are you sure you want to delete this image?
-          </AlertDialogTitle>
-          <AlertDialogDescription className="p-16-regular">
-            This will permanently delete this image
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className="border bg-red-500 text-white hover:bg-red-600"
-            onClick={() =>
-              startTransition(async () => {
-                await deleteImage(imageId);
-              })
-            }
+          </h3>
+          <p 
+            className="mb-6"
+            style={{ 
+              ...textStyles.subhead,
+              opacity: 0.8
+            }}
           >
-            {isPending ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            This will permanently delete this image
+          </p>
+          
+          <div className="flex justify-end gap-3">
+            <Controls.Button
+              theme={theme}
+              variant="text"
+              onClick={() => setIsOpen(false)}
+            >
+              Cancel
+            </Controls.Button>
+            <Controls.Button
+              theme={theme}
+              variant="push"
+              onClick={() => {
+                startTransition(async () => {
+                  await deleteImage(imageId);
+                  setIsOpen(false);
+                });
+              }}
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
+              {isPending ? "Deleting..." : "Delete"}
+            </Controls.Button>
+          </div>
+        </Material>
+      </Modal>
+    </>
   );
 };

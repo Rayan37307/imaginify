@@ -2,11 +2,11 @@
 
 import { loadStripe } from "@stripe/stripe-js";
 import { useEffect } from "react";
+import { useTheme } from '@/components/design-system/utils';
+import { Controls } from '@/components/design-system/controls';
 
 import { useToast } from "@/components/ui/use-toast";
 import { checkoutCredits } from "@/lib/actions/transaction.action";
-
-import { Button } from "../ui/button";
 
 const Checkout = ({
   plan,
@@ -20,6 +20,7 @@ const Checkout = ({
   buyerId: string;
 }) => {
   const { toast } = useToast();
+  const { theme } = useTheme();
 
   useEffect(() => {
     loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -60,15 +61,14 @@ const Checkout = ({
 
   return (
     <form action={onCheckout} method="POST">
-      <section>
-        <Button
-          type="submit"
-          role="link"
-          className="w-full rounded-full bg-purple-gradient bg-cover"
-        >
-          Buy Credit
-        </Button>
-      </section>
+      <Controls.Button
+        theme={theme}
+        variant="push"
+        type="submit"
+        className="w-full"
+      >
+        Buy Credit
+      </Controls.Button>
     </form>
   );
 };

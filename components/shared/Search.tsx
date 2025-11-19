@@ -3,14 +3,16 @@
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTheme } from '@/components/design-system/utils';
+import { Controls } from '@/components/design-system/controls';
 
-import { Input } from "@/components/ui/input";
 import { formUrlQuery, removeKeysFromQuery } from "@/lib/utils";
 
 export const Search = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
+  const { theme } = useTheme();
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -36,18 +38,21 @@ export const Search = () => {
   }, [router, searchParams, query]);
 
   return (
-    <div className="search">
-      <Image
-        src="/assets/icons/search.svg"
-        alt="search"
-        width={24}
-        height={24}
-      />
-
-      <Input
-        className="search-field"
-        placeholder="Search"
-        onChange={(e) => setQuery(e.target.value)}
+    <div className="relative flex items-center w-full md:w-64">
+      <span className="absolute left-3 pointer-events-none">
+        <Image
+          src="/assets/icons/search.svg"
+          alt="search"
+          width={18}
+          height={18}
+        />
+      </span>
+      <Controls.SearchInput
+        value={query}
+        onChange={setQuery}
+        theme={theme}
+        placeholder="Search..."
+        className="pl-10 w-full"
       />
     </div>
   );

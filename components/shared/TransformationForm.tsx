@@ -1,16 +1,8 @@
 "use client"
- 
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -34,7 +26,12 @@ import { getCldImageUrl } from "next-cloudinary"
 import { addImage, updateImage } from "@/lib/actions/image.actions"
 import { useRouter } from "next/navigation"
 import { InsufficientCreditsModal } from "./InsufficientCreditsModal"
- 
+import { useTheme } from '@/components/design-system/utils';
+import { Controls, Button as MacOSButton } from '@/components/design-system/controls';
+import { Material } from '@/components/design-system/materials';
+import { textStyles } from '@/components/design-system/typography';
+import { spacing } from '@/components/design-system/layout';
+
 export const formSchema = z.object({
   title: z.string(),
   aspectRatio: z.string().optional(),
@@ -52,6 +49,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
   const [transformationConfig, setTransformationConfig] = useState(config)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const { theme } = useTheme();
 
   const initialValues = data && action === 'Update' ? {
     title: data?.title,
@@ -66,7 +64,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
     resolver: zodResolver(formSchema),
     defaultValues: initialValues,
   })
- 
+
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -97,7 +95,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         try {
           // Validate required fields before saving
           console.log('🔍 Image data before saving:', imageData);
-          
+
           if (!imageData.title) {
             throw new Error('Image title is required');
           }
@@ -174,11 +172,11 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         ...prevState,
         [type]: {
           ...prevState?.[type],
-          [fieldName === 'prompt' ? 'prompt' : 'to' ]: value 
+          [fieldName === 'prompt' ? 'prompt' : 'to' ]: value
         }
       }))
     }, 1000)();
-      
+
     return onChangeField(value)
   }
 
@@ -203,134 +201,162 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
   }, [image, transformationType.config, type])
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {creditBalance < Math.abs(creditFee) && <InsufficientCreditsModal />}
-        <CustomField 
-          control={form.control}
-          name="title"
-          formLabel="Image Title"
-          className="w-full"
-          render={({ field }) => <Input {...field} className="input-field" />}
-        />
-
-        {type === 'fill' && (
-          <CustomField
-            control={form.control}
-            name="aspectRatio"
-            formLabel="Aspect Ratio"
-            className="w-full"
-            render={({ field }) => (
-              <Select
-                onValueChange={(value) => onSelectFieldHandler(value, field.onChange)}
-                value={field.value}
-              >
-                <SelectTrigger className="select-field">
-                  <SelectValue placeholder="Select size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(aspectRatioOptions).map((key) => (
-                    <SelectItem key={key} value={key} className="select-item">
-                      {aspectRatioOptions[key as AspectRatioKey].label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}  
-          />
-        )}
-
-        {(type === 'remove' || type === 'recolor') && (
-          <div className="prompt-field">
-            <CustomField 
+    <Material material="sheet" theme={theme} className="p-6 rounded-xl">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {creditBalance < Math.abs(creditFee) && <InsufficientCreditsModal />}
+          
+          <div>
+            <label style={{ ...textStyles.subhead, display: 'block', marginBottom: spacing[2] }}>
+              Image Title
+            </label>
+            <FormField
               control={form.control}
-              name="prompt"
-              formLabel={
-                type === 'remove' ? 'Object to remove' : 'Object to recolor'
-              }
-              className="w-full"
+              name="title"
               render={({ field }) => (
-                <Input 
+                <Controls.TextInput
                   value={field.value}
-                  className="input-field"
-                  onChange={(e) => onInputChangeHandler(
-                    'prompt',
-                    e.target.value,
-                    type,
-                    field.onChange
-                  )}
+                  onChange={field.onChange}
+                  theme={theme}
+                  placeholder="Enter image title"
                 />
               )}
             />
+          </div>
 
-            {type === 'recolor' && (
-              <CustomField 
+          {type === 'fill' && (
+            <div>
+              <label style={{ ...textStyles.subhead, display: 'block', marginBottom: spacing[2] }}>
+                Aspect Ratio
+              </label>
+              <FormField
                 control={form.control}
-                name="color"
-                formLabel="Replacement Color"
-                className="w-full"
+                name="aspectRatio"
                 render={({ field }) => (
-                  <Input 
+                  <Controls.PopupButton
                     value={field.value}
-                    className="input-field"
-                    onChange={(e) => onInputChangeHandler(
-                      'color',
-                      e.target.value,
-                      'recolor',
-                      field.onChange
-                    )}
+                    onChange={(value) => onSelectFieldHandler(value, field.onChange)}
+                    options={Object.keys(aspectRatioOptions).map(key => ({
+                      label: aspectRatioOptions[key as AspectRatioKey].label,
+                      value: key
+                    }))}
+                    theme={theme}
                   />
                 )}
               />
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        <div className="media-uploader-field">
-          <CustomField 
-            control={form.control}
-            name="publicId"
-            className="flex size-full flex-col"
-            render={({ field }) => (
-              <MediaUploader 
-                onValueChange={field.onChange}
-                setImage={setImage}
-                publicId={field.value}
+          {(type === 'remove' || type === 'recolor') && (
+            <div className="space-y-4">
+              <div>
+                <label style={{ ...textStyles.subhead, display: 'block', marginBottom: spacing[2] }}>
+                  {type === 'remove' ? 'Object to remove' : 'Object to recolor'}
+                </label>
+                <FormField
+                  control={form.control}
+                  name="prompt"
+                  render={({ field }) => (
+                    <Controls.TextInput
+                      value={field.value}
+                      onChange={(e) => onInputChangeHandler(
+                        'prompt',
+                        e.target.value,
+                        type,
+                        field.onChange
+                      )}
+                      theme={theme}
+                      placeholder={type === 'remove' ? 'Enter object to remove' : 'Enter object to recolor'}
+                    />
+                  )}
+                />
+              </div>
+
+              {type === 'recolor' && (
+                <div>
+                  <label style={{ ...textStyles.subhead, display: 'block', marginBottom: spacing[2] }}>
+                    Replacement Color
+                  </label>
+                  <FormField
+                    control={form.control}
+                    name="color"
+                    render={({ field }) => (
+                      <Controls.TextInput
+                        value={field.value}
+                        onChange={(e) => onInputChangeHandler(
+                          'color',
+                          e.target.value,
+                          'recolor',
+                          field.onChange
+                        )}
+                        theme={theme}
+                        placeholder="Enter replacement color"
+                      />
+                    )}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label style={{ ...textStyles.subhead, display: 'block', marginBottom: spacing[2] }}>
+                Upload Image
+              </label>
+              <FormField
+                control={form.control}
+                name="publicId"
+                render={({ field }) => (
+                  <MediaUploader
+                    onValueChange={field.onChange}
+                    setImage={setImage}
+                    publicId={field.value}
+                    image={image}
+                    type={type}
+                  />
+                )}
+              />
+            </div>
+
+            <div>
+              <label style={{ ...textStyles.subhead, display: 'block', marginBottom: spacing[2] }}>
+                Preview
+              </label>
+              <TransformedImage
                 image={image}
                 type={type}
+                title={form.getValues().title}
+                isTransforming={isTransforming}
+                setIsTransforming={setIsTransforming}
+                transformationConfig={transformationConfig}
               />
-            )}
-          />
+            </div>
+          </div>
 
-          <TransformedImage 
-            image={image}
-            type={type}
-            title={form.getValues().title}
-            isTransforming={isTransforming}
-            setIsTransforming={setIsTransforming}
-            transformationConfig={transformationConfig}
-          />
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Button 
-            type="button"
-            classNamey="submit-button capitalize"
-            disabled={isTransforming || newTransformation === null}
-            onClick={onTransformHandler}
-          >
-            {isTransforming ? 'Transforming...' : 'Apply Transformation'}
-          </Button>
-          <Button 
-            type="submit"
-            className="submit-button capitalize"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Submitting...' : 'Save Image'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex flex-col gap-3 pt-4">
+            <MacOSButton
+              theme={theme}
+              variant="push"
+              disabled={isTransforming || newTransformation === null}
+              onClick={onTransformHandler}
+              className="w-full"
+            >
+              {isTransforming ? 'Transforming...' : 'Apply Transformation'}
+            </MacOSButton>
+            <MacOSButton
+              theme={theme}
+              variant="push"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? 'Submitting...' : 'Save Image'}
+            </MacOSButton>
+          </div>
+        </form>
+      </Form>
+    </Material>
   )
 }
 

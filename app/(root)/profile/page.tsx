@@ -6,10 +6,14 @@ import { Collection } from "@/components/shared/Collection";
 import Header from "@/components/shared/Header";
 import { getUserImages } from "@/lib/actions/image.actions";
 import { getUserById } from "@/lib/actions/user.actions";
+import { useTheme } from '@/components/design-system/utils';
+import { Material } from '@/components/design-system/materials';
+import { textStyles } from '@/components/design-system/typography';
 
 const Profile = async ({ searchParams }: SearchParamProps) => {
   const page = Number(searchParams?.page) || 1;
   const { userId } = auth();
+  const { theme } = useTheme();
 
   if (!userId) redirect("/sign-in");
 
@@ -20,37 +24,39 @@ const Profile = async ({ searchParams }: SearchParamProps) => {
     <>
       <Header title="Profile" />
 
-      <section className="profile">
-        <div className="profile-balance">
-          <p className="p-14-medium md:p-16-medium">CREDITS AVAILABLE</p>
-          <div className="mt-4 flex items-center gap-4">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <Material material="sheet" theme={theme} className="p-6 rounded-xl">
+          <p className="mb-4" style={{ ...textStyles.subhead, opacity: 0.8 }}>
+            CREDITS AVAILABLE
+          </p>
+          <div className="flex items-center gap-4 mt-2">
             <Image
               src="/assets/icons/coins.svg"
               alt="coins"
-              width={50}
-              height={50}
-              className="size-9 md:size-12"
+              width={40}
+              height={40}
             />
-            <h2 className="h2-bold text-dark-600">{user.creditBalance}</h2>
+            <h2 style={{ ...textStyles.title1 }}>{user.creditBalance}</h2>
           </div>
-        </div>
+        </Material>
 
-        <div className="profile-image-manipulation">
-          <p className="p-14-medium md:p-16-medium">IMAGE MANIPULATION DONE</p>
-          <div className="mt-4 flex items-center gap-4">
+        <Material material="sheet" theme={theme} className="p-6 rounded-xl">
+          <p className="mb-4" style={{ ...textStyles.subhead, opacity: 0.8 }}>
+            IMAGE MANIPULATION DONE
+          </p>
+          <div className="flex items-center gap-4 mt-2">
             <Image
               src="/assets/icons/photo.svg"
-              alt="coins"
-              width={50}
-              height={50}
-              className="size-9 md:size-12"
+              alt="images"
+              width={40}
+              height={40}
             />
-            <h2 className="h2-bold text-dark-600">{images?.data.length}</h2>
+            <h2 style={{ ...textStyles.title1 }}>{images?.data.length}</h2>
           </div>
-        </div>
+        </Material>
       </section>
 
-      <section className="mt-8 md:mt-14">
+      <section className="mt-8">
         <Collection
           images={images?.data}
           totalPages={images?.totalPages}

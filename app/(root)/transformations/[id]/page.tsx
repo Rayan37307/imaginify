@@ -8,9 +8,15 @@ import { Button } from "@/components/ui/button";
 import { getImageById } from "@/lib/actions/image.actions";
 import { getImageSize } from "@/lib/utils";
 import { DeleteConfirmation } from "@/components/shared/DeleteConfirmation";
+import { useTheme } from '@/components/design-system/utils';
+import { Material } from '@/components/design-system/materials';
+import { textStyles } from '@/components/design-system/typography';
+import { Controls } from '@/components/design-system/controls';
+import { spacing } from '@/components/design-system/layout';
 
 const ImageDetails = async ({ params: { id } }: SearchParamProps) => {
   const { userId } = auth();
+  const { theme } = useTheme();
 
   const image = await getImageById(id);
 
@@ -18,59 +24,92 @@ const ImageDetails = async ({ params: { id } }: SearchParamProps) => {
     <>
       <Header title={image.title} />
 
-      <section className="mt-5 flex flex-wrap gap-4">
-        <div className="p-14-medium md:p-16-medium flex gap-2">
-          <p className="text-dark-600">Transformation:</p>
-          <p className=" capitalize text-purple-400">
+      <section className="mt-6 flex flex-wrap gap-4 items-center">
+        <div className="flex items-center gap-2">
+          <span style={{ ...textStyles.subhead, opacity: 0.7 }}>Transformation:</span>
+          <span 
+            className="px-2 py-1 rounded-full text-xs"
+            style={{ 
+              backgroundColor: theme === 'light' ? '#f0f0f0' : '#404040',
+              ...textStyles.footnote,
+              textTransform: 'capitalize'
+            }}
+          >
             {image.transformationType}
-          </p>
+          </span>
         </div>
 
         {image.prompt && (
           <>
-            <p className="hidden text-dark-400/50 md:block">&#x25CF;</p>
-            <div className="p-14-medium md:p-16-medium flex gap-2 ">
-              <p className="text-dark-600">Prompt:</p>
-              <p className=" capitalize text-purple-400">{image.prompt}</p>
+            <span style={{ opacity: 0.5 }}>&#x25CF;</span>
+            <div className="flex items-center gap-2">
+              <span style={{ ...textStyles.subhead, opacity: 0.7 }}>Prompt:</span>
+              <span 
+                className="px-2 py-1 rounded-full text-xs"
+                style={{ 
+                  backgroundColor: theme === 'light' ? '#f0f0f0' : '#404040',
+                  ...textStyles.footnote,
+                  textTransform: 'capitalize'
+                }}
+              >
+                {image.prompt}
+              </span>
             </div>
           </>
         )}
 
         {image.color && (
           <>
-            <p className="hidden text-dark-400/50 md:block">&#x25CF;</p>
-            <div className="p-14-medium md:p-16-medium flex gap-2">
-              <p className="text-dark-600">Color:</p>
-              <p className=" capitalize text-purple-400">{image.color}</p>
+            <span style={{ opacity: 0.5 }}>&#x25CF;</span>
+            <div className="flex items-center gap-2">
+              <span style={{ ...textStyles.subhead, opacity: 0.7 }}>Color:</span>
+              <span 
+                className="px-2 py-1 rounded-full text-xs"
+                style={{ 
+                  backgroundColor: theme === 'light' ? '#f0f0f0' : '#404040',
+                  ...textStyles.footnote,
+                  textTransform: 'capitalize'
+                }}
+              >
+                {image.color}
+              </span>
             </div>
           </>
         )}
 
         {image.aspectRatio && (
           <>
-            <p className="hidden text-dark-400/50 md:block">&#x25CF;</p>
-            <div className="p-14-medium md:p-16-medium flex gap-2">
-              <p className="text-dark-600">Aspect Ratio:</p>
-              <p className=" capitalize text-purple-400">{image.aspectRatio}</p>
+            <span style={{ opacity: 0.5 }}>&#x25CF;</span>
+            <div className="flex items-center gap-2">
+              <span style={{ ...textStyles.subhead, opacity: 0.7 }}>Aspect Ratio:</span>
+              <span 
+                className="px-2 py-1 rounded-full text-xs"
+                style={{ 
+                  backgroundColor: theme === 'light' ? '#f0f0f0' : '#404040',
+                  ...textStyles.footnote,
+                  textTransform: 'capitalize'
+                }}
+              >
+                {image.aspectRatio}
+              </span>
             </div>
           </>
         )}
       </section>
 
-      <section className="mt-10 border-t border-dark-400/15">
-        <div className="transformation-grid">
-          {/* MEDIA UPLOADER */}
-          <div className="flex flex-col gap-4">
-            <h3 className="h3-bold text-dark-600">Original</h3>
-
+      <section className="mt-8" style={{ borderColor: theme === 'light' ? '#e5e7eb' : '#374151' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* ORIGINAL IMAGE */}
+          <Material material="sheet" theme={theme} className="p-4 rounded-xl">
+            <h3 style={{ ...textStyles.headline, marginBottom: spacing[3] }}>Original</h3>
             <Image
               width={getImageSize(image.transformationType, image, "width")}
               height={getImageSize(image.transformationType, image, "height")}
               src={image.secureURL}
               alt="image"
-              className="transformation-original_image"
+              className="w-full h-auto rounded-lg"
             />
-          </div>
+          </Material>
 
           {/* TRANSFORMED IMAGE */}
           <TransformedImage
@@ -84,12 +123,16 @@ const ImageDetails = async ({ params: { id } }: SearchParamProps) => {
         </div>
 
         {userId === image.author.clerkId && (
-          <div className="mt-4 space-y-4">
-            <Button asChild type="button" className="submit-button capitalize">
-              <Link href={`/transformations/${image._id}/update`}>
+          <div className="mt-6 space-y-4">
+            <Link href={`/transformations/${image._id}/update`}>
+              <Controls.Button 
+                theme={theme} 
+                variant="push" 
+                className="w-full"
+              >
                 Update Image
-              </Link>
-            </Button>
+              </Controls.Button>
+            </Link>
 
             <DeleteConfirmation imageId={image._id} />
           </div>
